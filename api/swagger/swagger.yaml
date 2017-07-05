@@ -1,0 +1,166 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Quotes
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths 
+basePath: /
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /quotes:
+    # controller name
+    x-swagger-router-controller: quote
+    get:
+      description: get a list of all quotes
+      # responses
+      responses:
+        "200":
+          $ref: "#/responses/Quotes"
+        default:
+          $ref: "#/responses/default"
+  /quote:
+    x-swagger-router-controller: quote
+    post:
+      description: add a new quote
+      parameters:
+        - name: quote
+          description: quote properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Quote"
+      responses:
+        "200":
+          $ref: "#/responses/200"
+        default:
+          $ref: "#/responses/default"
+
+  /quote/{id}:
+    x-swagger-router-controller: quote
+    get:
+      description: get a quote
+      parameters:
+        - name: id
+          type: number
+          in: path
+          required: true
+      responses:
+        "200":
+          $ref: "#/responses/Quote"
+        default:
+          $ref: "#/responses/default"
+    put:
+      description: update a quote
+      parameters:
+        - name: id
+          type: number
+          in: path
+          required: true
+        - name: quote
+          description: quote properties
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/Quote"
+      responses:
+        "200":
+          $ref: "#/responses/200"
+        default:
+          $ref: "#/responses/default"
+    delete:
+      description: delete a quote
+      parameters:
+        - name: id
+          type: number
+          in: path
+          required: true
+      responses:
+        "200":
+          $ref: "#/responses/200"
+        default:
+          $ref: "#/responses/default"
+
+  /swagger:
+    x-swagger-pipe: swagger_raw
+
+responses:
+  "Quotes":
+    description: Success
+    schema:
+      $ref: "#/definitions/Quotes"
+  "Quote":
+    description: Success
+    schema:
+      $ref: "#/definitions/Quote"
+  "200":
+    description: Success
+    schema:
+      $ref: "#/definitions/GeneralResponse"
+  default:
+    description: Error
+    schema:
+      $ref: "#/definitions/ErrorResponse"
+
+# complex objects have schema definitions
+definitions:
+  Quote:
+    type: object
+    required:
+      - quote
+    properties:
+      id:
+        type: number
+        description: unique identifier
+      quote:
+        type: string
+        description: the quote
+      quotee:
+        type: string
+        description: person who said the quote
+      source:
+        type: string
+        description: source of the quote, e.g. movie, show, song
+      metadata:
+        type: string
+        description: additional information about the quote
+
+  Quotes:
+    required:
+      - quotes
+    properties:
+      # array of quotes
+      quotes:
+        type: array
+        items:
+          $ref: '#/definitions/Quote'
+
+  GeneralResponse:
+    type: object
+    required:
+      - return
+      - message
+    properties:
+      return:
+        type: number
+        description: 0 if successful
+      message:
+        type: string
+        description: description
+
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string

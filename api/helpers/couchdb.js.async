@@ -1,0 +1,53 @@
+'use strict';
+
+var debug = require('debug')('couchdb');
+var bluebird = require('bluebird');
+
+var config = require('./../../config.json').couchdb
+
+var nano = require('nano')(config.url);
+var nano = bluebird.promisifyAll(nano);
+
+exports.setup = function(clean = false) {
+	debug('[setup]');
+	debug('setting up db.');
+
+	nano.db.get(config.db, function(err, body) {
+		if (!err) {
+			debug('db exists.');
+			if (clean) {
+				debug('cleaning db.');
+				nano.db.destroy(config.db, function(err, body) {
+					if (!err) {
+						nano.db.create(config.db, function(err, body) {
+							if (err) {
+								debug('error creating db: ', err);
+								return;
+							} else {
+								debug('new db created.');
+								return;
+							}
+						});
+					} else {
+						debug('error deleting db: ', err);
+						return;
+					}
+				});
+			} else {
+				debug('not cleaning db.');
+				return;
+			}
+		} else { 
+			debug('db does not exist.');
+			nano.db.create(config.db, function(err, body) {
+				if (err) {
+					debug('error creating db: ', err);
+					return;
+				} else {
+					consle.log('new db created.');
+					return;
+				}
+			});
+		}
+	});
+}
